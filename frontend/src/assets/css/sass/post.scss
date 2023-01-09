@@ -1,0 +1,74 @@
+//start of post css
+
+.homepagePost_Card {
+    width: 100%;
+    height: 800px;
+    display: block;
+    text-decoration: none;
+    background-color: white;
+    box-shadow:  8px 8px 8px rgb(0 0 0 / 60%);
+    border-radius: 3px;
+}
+
+.homepageCard_Content {
+    width: 100%;
+    padding-left: 0px;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    padding-left: 10px;
+    font-size: 16px;
+    border-bottom: black solid 2px;
+    padding-top: 20px;
+}
+
+.homepageCard_Title {
+    width: 96%;
+    height: 25px;
+    font-size: 19px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.homepageCard_Description {
+    width: 96%;
+    height: max-content;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
+    white-space: normal;
+}
+
+.homepageCard_Op {
+    width: 96%;
+    height: 50px;
+}
+
+#button_Container {
+    width:100%;
+    height: auto;
+    display: flex;
+    flex-flow: row nowrap;
+    gap: 60px;
+    justify-content: center;
+    padding-top: 25px;
+}
+
+.ownerButtons {
+    width: 20%;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+#back, #modify, #delete {
+    background-color:gray;
+    color: white;
+}
+
+#modify {
+    background-color: blueviolet;
+}
+
+#delete {
+    background-color: red;
+}
