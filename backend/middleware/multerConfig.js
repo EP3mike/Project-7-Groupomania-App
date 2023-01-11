@@ -1,4 +1,5 @@
 const multer = require('multer');
+const path = require('path');
 
 const MIME_TYPES = {
     'image/jpg' : 'jpg',
@@ -18,4 +19,29 @@ const storage = multer.diskStorage({
     }
 });
 
-module.exports = multer({storage: storage}).single('image');
+module.exports = multer({storage: storage}).single('postImage');
+
+// const storage = multer.diskStorage({
+//     destinaiton: (req, file, cb) => {
+//         cb(null, './images');
+//     },
+//     filename: (req, file, cb) => {
+//         cb(null, Date.now() + path.extname(file.originalname))
+//     }
+// })
+
+// //var upload
+// module.exports = multer({
+//     storage: storage,
+//     limits: {fileSize: '1000000'},
+//     fileFilter: (req, file, cb) => {
+//         const fileTypes = /jpeg|jpg|png|img/
+//         const mimeType = fileTypes.test(file.mimetype)
+//         const extname = fileTypes.test(path.extname(file.originalname))
+
+//         if(mimeType && extname) {
+//             return cb(null, true)
+//         }
+//         cb('Please upload a proper image to upload')
+//     }
+// }).single('postImage')
