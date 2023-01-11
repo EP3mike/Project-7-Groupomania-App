@@ -28,7 +28,7 @@ db.sequelize.sync({ force: false})
     });
 
 //forwards image sent to server to the image backend folder
-// app.use('/images', express.static(path.join(__dirname, 'images')));
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 //forwards all api/auth/user req to routers 
 app.use("/api/auth/", userRoutes);
