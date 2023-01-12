@@ -118,25 +118,65 @@ exports.createPost = (req, res, next) => {
 //updates a post then replaces columns in db
 exports.updatePost = (req, res, next) => {
     const postId = req.params.id;
-    Post.update(req.body, {
-        where: { id: postId}
-    })
-        .then(num => {
-            // if 1 row affected then our post was updated correctly
-            if(num == 1) {
-                res.send({ message: 'Post updated successfully!'});
-
-            } else {
-                res.send({
-                    message: 'Cannot update post with id= ' + postId
+    if(req.file) { 
+        const url = req.protocol + "://" + req.get("host");
+        //case of post with img
+        const updatedPost = {
+            postTitle: req.body.postTitle,
+            // postImage:"/images/" + req.file.path,
+            postImage: url + "/images/" + req.file.filename,
+            postDescription: req.body.postDescription,
+            userId: req.body.userId,
+        };
+        Post.update(updatedPost, { where: {id: postId}})
+            .then(data => {
+                res.send(data);
+            })
+            .catch(err => {
+                res.status(500).send({
+                    message:
+                    err.message || 'Error occurred while creating a post!'
                 });
-            }
-        })
-        .catch(err => {
-            res.status(500).send({
-                message: 'Error updating post with id= ' + postId
             });
-        });
+    } else {
+        const updatedPost = {
+            postTitle: req.body.postTitle,
+            postImage: req.body.postImage,
+            postDescription: req.body.postDescription,
+            userId: req.body.userId,
+        };
+         //save post in db
+        Post.update(updatedPost, { where: {id: postId}})
+            .then(data => {
+                res.send(data);
+            })
+            .catch(err => {
+                res.status(500).send({
+                    message:
+                    err.message || 'Error occurred while creating a post!'
+                });
+            });
+    }
+
+    // Post.update(req.body, {
+    //     where: { id: postId}
+    // })
+    //     .then(num => {
+    //         // if 1 row affected then our post was updated correctly
+    //         if(num == 1) {
+    //             res.send({ message: 'Post updated successfully!'});
+
+    //         } else {
+    //             res.send({
+    //                 message: 'Cannot update post with id= ' + postId
+    //             });
+    //         }
+    //     })
+    //     .catch(err => {
+    //         res.status(500).send({
+    //             message: 'Error updating post with id= ' + postId
+    //         });
+    //     });
 };
 
 //delete a specific post by its id & unlinks postImage from static folder
