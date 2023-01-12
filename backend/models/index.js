@@ -24,6 +24,13 @@ db.posts = require('./post')(sequelize, Sequelize); // post sequelize model
 db.users = require('./user')(sequelize, Sequelize); //user sequelize model
 db.listOfReaders = require('./readPost')(sequelize, Sequelize); // users who read post list model
 
+//relation built between user table and post table
+db.users.hasMany(db.posts, {as:'posts'});
+db.posts.belongsTo(db.users, {
+    foreignKey: 'userId',
+    as: 'users',
+})
+
 //relation built between post table and list of Readers table
 db.posts.hasMany(db.listOfReaders, {as: 'listOfReaders'});
 db.listOfReaders.belongsTo(db.posts, {

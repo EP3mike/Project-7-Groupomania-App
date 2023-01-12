@@ -22,14 +22,14 @@
 
     
         <main>
-            <form @submit.prevent="updateSpecificPost" id= form_Container>
+            <form @submit.prevent="updateSpecificPost" enctype="multipart/form-data" id= form_Container>
                <div class="form_Group">
                     <label for="title">Title</label>
                     <input type="text" class="form-control" id ='title' formControlName='title' required v-model="post.postTitle">
                 </div>
                 <div class="form_Group">
                     <label for="file">Select an image:</label>
-                    <input type="file" id="file" formControlName="file">
+                    <input type="file" id="file" ref='postImage' @change="fileLoaded" formControlName="file">
                 </div>
                 <div class="form_Group">
                     <label for="description">Description</label>
@@ -63,10 +63,15 @@ export default {
     name:'Modify-comp',
     data() {
         return {
-            post: []
+            post: [],
+            emptyFile: true,
         };
     },
     methods: {
+        fileLoaded() {
+            this.emptyFile = false;
+            console.log(this.emptyFile);
+        },
         retrieveSpecificPost(id) {
             PostDataService.getOnePost(id)
                 .then(response => {
@@ -78,30 +83,48 @@ export default {
                 });
         },
         updateSpecificPost() {
-            var data = {
-                id: this.post.id,
-                postTitle: this.post.postTitle,
-                postImage: this.post.postImage,
-                postDescription: this.post.postDescription
-            };
+            // var data = {
+            //     id: this.post.id,
+            //     postTitle: this.post.postTitle,
+            //     postImage: this.post.postImage,
+            //     postDescription: this.post.postDescription
+            // };
+            const data = new FormData();
+            data.append('id', this.post.id);
+            data.append('postTitle',this.post.postTitle);
+
+            //checks to send file or empty instead of undefined for post image field
+            if(this.emptyFile){
+                data.append('postImage', this.post.postImage);
+            } else {
+                data.append('postImage', this.$refs.postImage.files[0]);
+            }
+
+            data.append('postDescription', this.post.postDescription);
             PostDataService.updatePost(data, this.post.id)
                 .then(response => {
                     console.log(response.data);
-                    this.PostToLink();
+                    this.LinkToPost();
                 })
                 .catch(e => {
                     console.log(e);
+                    this.LinkToModifyPost();
                 });
         },
         logOut() {
             this.$store.dispatch('auth/logout');
             this.$router.push('/');
         },
-        PostToLink() {
+        LinkToPost() {
             let currentPostId = this.post.id;
             let postPath = '/post/';
             this.$router.push(postPath + currentPostId);
-        } 
+        },
+        LinkToModifyPost() {
+            let currentPostId = this.post.id;
+            let modifyPostPath = '/modify/';
+            this.$router.push(modifyPostPath + currentPostId);
+        }
     },
     mounted() {
         this.retrieveSpecificPost(this.$route.params.id);

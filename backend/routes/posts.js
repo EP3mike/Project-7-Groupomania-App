@@ -7,7 +7,7 @@ const postController = require('../controllers/post');
 
 //middleware
 const authorize = require('../middleware/auth'); //jwt check
-// const multer = require('../middleware/multer');
+const multer = require('../middleware/multerConfig'); // for image processing
 
 
 // router.get('/', postController.getAllPosts);
@@ -19,11 +19,11 @@ const authorize = require('../middleware/auth'); //jwt check
 
 router.get('/', authorize.verifyToken , postController.getAllPosts);
 router.get('/:id', authorize.verifyToken  , postController.getOnePost);
-router.post('/', authorize.verifyToken  , postController.createPost);
+router.post('/', authorize.verifyToken , multer , postController.createPost);
 //for adding users to list of readers on post
 router.post('/:id', authorize.verifyToken  , postController.addReaderToList);
 
-router.put('/:id', authorize.verifyToken  , postController.updatePost)
+router.put('/:id', authorize.verifyToken, multer  , postController.updatePost)
 router.delete('/:id', authorize.verifyToken  , postController.deletePost);
 
 module.exports = router;

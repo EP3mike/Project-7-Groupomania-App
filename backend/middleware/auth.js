@@ -7,7 +7,7 @@ const User = db.users;
 verifyToken = (req, res, next) => {
     // const token = req.headers.authorization.split(' ')[1];
     let token = req.headers["x-access-token"];
-    console.log(token);
+    // console.log(token);
 
     if(!token) {
         return res.status(403).send({

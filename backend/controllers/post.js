@@ -1,5 +1,6 @@
 const db = require('../models');
 const fs = require('fs');
+const path = require('path');
 const Post = db.posts;
 const Op = db.Sequelize.Op;
 const listOfReaders = db.listOfReaders;
@@ -34,8 +35,6 @@ exports.getOnePost= (req, res, next) => {
 
 //adds userID to a posts read list so front end can distinguish read from unread posts
 exports.addReaderToList = (req, res, next) => {
-    // post_Id = req.params.id;
-    // user_Id = req.body.userId;
     const newReader = {
         userId: req.body.userId,
         postId: req.body.postId
@@ -55,7 +54,7 @@ exports.addReaderToList = (req, res, next) => {
 //create and save a new post to db
 exports.createPost = (req, res, next) => {
     //for image capture in coord with multer
-    // const url = req.protocol + "://" + req.get("host");
+    const url = req.protocol + "://" + req.get("host");
     //check if empty req
     if(!req.body.postTitle) {
         res.status(400).send({
@@ -64,69 +63,165 @@ exports.createPost = (req, res, next) => {
         return;
     }
     //creating a new post with req body
-    const post = {
-        postTitle: req.body.postTitle,
-        // postImage: url + "/images/" + req.file.filename,
-        postImage: req.body.postImage,
-        postDescription: req.body.postDescription
-    };
-    //save post in db
-    Post.create(post)
-        .then(data => {
-            res.send(data);
-        })
-        .catch(err => {
-            res.status(500).send({
-                message:
+    if(req.file) { 
+        //case of post with img
+        const post = {
+            postTitle: req.body.postTitle,
+            // postImage:"/images/" + req.file.path,
+            postImage: url + "/images/" + req.file.filename,
+            postDescription: req.body.postDescription,
+            userId: req.body.userId,
+        };
+        Post.create(post)
+            .then(data => {
+                res.send(data);
+            })
+            .catch(err => {
+                res.status(500).send({
+                    message:
                     err.message || 'Error occurred while creating a post!'
+                });
             });
-        });
+    } else {
+        const post = {
+            postTitle: req.body.postTitle,
+            postImage: req.body.postImage,
+            postDescription: req.body.postDescription,
+            userId: req.body.userId,
+        };
+         //save post in db
+        Post.create(post)
+            .then(data => {
+                res.send(data);
+            })
+            .catch(err => {
+                res.status(500).send({
+                    message:
+                    err.message || 'Error occurred while creating a post!'
+                });
+            });
+    }
+    
+    // //save post in db
+    // Post.create(post)
+    //     .then(data => {
+    //         res.send(data);
+    //     })
+    //     .catch(err => {
+    //         res.status(500).send({
+    //             message:
+    //                 err.message || 'Error occurred while creating a post!'
+    //         });
+    //     });
 };
 
 //updates a post then replaces columns in db
 exports.updatePost = (req, res, next) => {
     const postId = req.params.id;
-    Post.update(req.body, {
-        where: { id: postId}
-    })
-        .then(num => {
-            // if 1 row affected then our post was updated correctly
-            if(num == 1) {
-                res.send({ message: 'Post updated successfully!'});
-
-            } else {
-                res.send({
-                    message: 'Cannot update post with id= ' + postId
+    if(req.file) { 
+        const url = req.protocol + "://" + req.get("host");
+        //case of post with img
+        const updatedPost = {
+            postTitle: req.body.postTitle,
+            // postImage:"/images/" + req.file.path,
+            postImage: url + "/images/" + req.file.filename,
+            postDescription: req.body.postDescription,
+            userId: req.body.userId,
+        };
+        Post.update(updatedPost, { where: {id: postId}})
+            .then(data => {
+                res.send(data);
+            })
+            .catch(err => {
+                res.status(500).send({
+                    message:
+                    err.message || 'Error occurred while creating a post!'
                 });
-            }
-        })
-        .catch(err => {
-            res.status(500).send({
-                message: 'Error updating post with id= ' + postId
             });
-        });
+    } else {
+        const updatedPost = {
+            postTitle: req.body.postTitle,
+            postImage: req.body.postImage,
+            postDescription: req.body.postDescription,
+            userId: req.body.userId,
+        };
+         //save post in db
+        Post.update(updatedPost, { where: {id: postId}})
+            .then(data => {
+                res.send(data);
+            })
+            .catch(err => {
+                res.status(500).send({
+                    message:
+                    err.message || 'Error occurred while creating a post!'
+                });
+            });
+    }
+
+    // Post.update(req.body, {
+    //     where: { id: postId}
+    // })
+    //     .then(num => {
+    //         // if 1 row affected then our post was updated correctly
+    //         if(num == 1) {
+    //             res.send({ message: 'Post updated successfully!'});
+
+    //         } else {
+    //             res.send({
+    //                 message: 'Cannot update post with id= ' + postId
+    //             });
+    //         }
+    //     })
+    //     .catch(err => {
+    //         res.status(500).send({
+    //             message: 'Error updating post with id= ' + postId
+    //         });
+    //     });
 };
 
-//delete a specific post by its id
+//delete a specific post by its id & unlinks postImage from static folder
 exports.deletePost = (req, res, next) => {
     const postId = req.params.id;
-    Post.destroy({
-        where: { id: postId}
-    })
-        .then(num => {
-            // if 1 row affected then our post was deleted correctly
-            if(num == 1) {
-                res.send({ message: 'Post deleted successfully!'});
+    Post.findByPk(postId)
+        .then(data => {
+            const filename = data.postImage.split("/images/")[1];
+            fs.unlink("images/" + filename , () => {
+                Post.destroy({ where: {id: postId}})
+                    .then(num => {
+                        // if 1 row affected then our post was deleted correctly
+                        if(num == 1) {
+                            res.send({ message: 'Post deleted successfully!'});
 
-            } else {
-                res.send({
-                    message: 'Cannot delete post with id= ' + postId
-                });
-            }
-        })
-        .catch(err => {
-            res.status(500).send({
-                message: 'Error deleting post with id= ' + postId
+                        } else {
+                            res.send({
+                                message: 'Cannot delete post with id= ' + postId
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        res.status(500).send({
+                            message: 'Error deleting post with id= ' + postId
+                        });
+                    });
             });
         });
+    // Post.destroy({
+    //     where: { id: postId}
+    // })
+    //     .then(num => {
+    //         // if 1 row affected then our post was deleted correctly
+    //         if(num == 1) {
+    //             res.send({ message: 'Post deleted successfully!'});
+
+    //         } else {
+    //             res.send({
+    //                 message: 'Cannot delete post with id= ' + postId
+    //             });
+    //         }
+    //     })
+    //     .catch(err => {
+    //         res.status(500).send({
+    //             message: 'Error deleting post with id= ' + postId
+    //         });
+    //     });
 };

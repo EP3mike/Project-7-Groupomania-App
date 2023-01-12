@@ -22,14 +22,14 @@
 
     
         <main>
-            <form @submit.prevent="createPost" id= form_Container>
+            <form @submit.prevent="createPost" enctype="multipart/form-data" form_Container>
                <div class="form_Group">
                     <label for="title">Title</label>
                     <input type="text" class="form-control" id ='title' formControlName='title' required v-model="post.postTitle">
                 </div>
                 <div class="form_Group">
                     <label for="file">Select an image:</label>
-                    <input type="file" id="file" formControlName="file">
+                    <input type="file" id="file" ref='postImage' @change="fileLoaded" formControlName="file">
                 </div>
                 <div class="form_Group">
                     <label for="description">Description</label>
@@ -69,20 +69,37 @@ export default {
                 postImage: '',
                 postDescription: "",
                 userId: ""
-            }   
+            },
+            emptyFile: true,  
         }
     },
     methods: {
+        fileLoaded() {
+            this.emptyFile = false;
+        },
         createPost() {
-            var data = {
-                postTitle: this.post.postTitle,
-                postImage: this.post.postImage,
-                postDescription: this.post.postDescription
-            };
+            // var data = {
+            //     postTitle: this.post.postTitle,
+            //     postImage: this.$refs.file.files[0],
+            //     postDescription: this.post.postDescription
+            // };
+            const data = new FormData();
+            data.append('postTitle',this.post.postTitle);
+
+            //checks to send file or empty instead of undefined for post image field
+            if(this.emptyFile){
+                data.append('postImage', this.post.postImage);
+            } else {
+                data.append('postImage',this.$refs.postImage.files[0]);
+            }
+
+            data.append('postDescription',this.post.postDescription);
+            data.append('userId', this.$store.state.auth.user.id);
+
             PostDataService.createPost(data)
                 .then(response => {
                     this.post.id = response.data.id;
-                    // this.post.userId = response.user.id;
+                    // this.post.userId = response.data.userId;
                     this.$router.push('/homepage');
                     console.log(response.data);
                 })

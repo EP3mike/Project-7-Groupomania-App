@@ -5,7 +5,7 @@ module.exports = (sequelize, Sequelize) => {
         userId: {type: Sequelize.INTEGER}, // to check against logged in local storage to impliment read post css class
     },
     {
-        timestamps: false,
+        timestamps: true,
     }
     );
     return readPostList;
