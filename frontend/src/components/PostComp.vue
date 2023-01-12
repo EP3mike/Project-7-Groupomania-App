@@ -15,12 +15,6 @@
                             <li>Settings</li>
                         </RouterLink>
                         <RouterView/>
-                        <!-- <a href="./homepage.html">
-                            <li>Home</li>
-                        </a>
-                        <a href="./settings.html">
-                            <li>Settings</li>
-                        </a> -->
                     </ul>
                 </nav>
             </div>
@@ -36,6 +30,9 @@
                             <h3 class="homepageCard_Title">
                                 {{ post.postTitle}}
                             </h3>
+                            <div v-if="(post.postImage !== '')" class="text-center homepageCard_Description">
+                                <img :src="post.postImage" alt="Responsive Image" class="img-fluid">
+                            </div>
                             <p class="homepageCard_Description">
                                 {{post.postDescription}}
                             </p>
@@ -85,22 +82,6 @@ export default {
                     console.log(e);
                 });
         },
-        updateSpecificPost() {
-            let data = {
-                id: this.post.id,
-                postTitle: this.post.postTitle,
-                postImage: this.post.postImage,
-                postDescription: this.post.postDescription
-            };
-            PostDataService.updatePost(data, this.post.id)
-                .then(response => {
-                    console.log(response.data);
-                    this.mounted();
-                })
-                .catch(e => {
-                    console.log(e);
-                });
-        },
         deletePost() {
             PostDataService.deletePost(this.post.id)
                 .then(response => {
@@ -121,7 +102,6 @@ export default {
         modifyPostLink() {
             let currentPostId = this.post.id;
             let submitPath = '/modify/';
-            console.log(submitPath + currentPostId);
             this.$router.push(submitPath + currentPostId);
         },
         //maybe add a check if user & post combo exists to not send a req or include time
@@ -130,10 +110,6 @@ export default {
                 userId: currentUser,
                 postId: Id
             }
-            console.log(data);
-            // for(let readers in this.post.listOfReaders) {
-            //     console.log(readers);
-            // }
             
             PostDataService.updatePostReaders(data, Id)
                 .then(response => {
@@ -148,8 +124,9 @@ export default {
             
     },
     mounted() {
-        this.retrieveSpecificPost(this.$route.params.id);
         this.hasRead(this.$route.params.id, this.$store.state.auth.user.id);
+        this.retrieveSpecificPost(this.$route.params.id);
+        
     }
 }
 </script>
