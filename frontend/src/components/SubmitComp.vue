@@ -94,11 +94,12 @@ export default {
             }
 
             data.append('postDescription',this.post.postDescription);
+            data.append('userId', this.$store.state.auth.user.id);
 
             PostDataService.createPost(data)
                 .then(response => {
                     this.post.id = response.data.id;
-                    // this.post.userId = response.user.id;
+                    // this.post.userId = response.data.userId;
                     this.$router.push('/homepage');
                     console.log(response.data);
                 })
