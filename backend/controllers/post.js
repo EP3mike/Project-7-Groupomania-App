@@ -35,8 +35,6 @@ exports.getOnePost= (req, res, next) => {
 
 //adds userID to a posts read list so front end can distinguish read from unread posts
 exports.addReaderToList = (req, res, next) => {
-    // post_Id = req.params.id;
-    // user_Id = req.body.userId;
     const newReader = {
         userId: req.body.userId,
         postId: req.body.postId
@@ -71,7 +69,8 @@ exports.createPost = (req, res, next) => {
             postTitle: req.body.postTitle,
             // postImage:"/images/" + req.file.path,
             postImage: url + "/images/" + req.file.filename,
-            postDescription: req.body.postDescription
+            postDescription: req.body.postDescription,
+            userId: req.body.userId,
         };
         Post.create(post)
             .then(data => {
@@ -87,7 +86,8 @@ exports.createPost = (req, res, next) => {
         const post = {
             postTitle: req.body.postTitle,
             postImage: req.body.postImage,
-            postDescription: req.body.postDescription
+            postDescription: req.body.postDescription,
+            userId: req.body.userId,
         };
          //save post in db
         Post.create(post)
