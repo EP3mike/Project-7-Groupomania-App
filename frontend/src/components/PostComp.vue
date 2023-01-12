@@ -38,10 +38,13 @@
                             </p>
                         </div>
 
-                        <div id="button_Container">
+                        <div v-if="(authorizedAccess == true)" id="button_Container">
                             <button @click.prevent="backToHome()" class="ownerButtons" id="back">BACK</button>
                             <button @click.prevent="modifyPostLink()" class="ownerButtons" id="modify">MODIFY</button>
                             <button @click='deletePost()' class="ownerButtons" id="delete">DELETE</button>
+                        </div>
+                        <div v-if="(authorizedAccess == false)" id="button_Container">
+                            <button @click.prevent="backToHome()" class="ownerButtons text-center" id="back">BACK</button>
                         </div>
                     </div>
                 </div>
@@ -68,7 +71,8 @@ export default {
     name:'Post-comp',
     data() {
         return {
-            post: []
+            post: [],
+            authorizedAccess:''
         };
     },
     methods: {
@@ -76,6 +80,7 @@ export default {
             PostDataService.getOnePost(id)
                 .then(response => {
                     this.post = response.data;
+                    this.hasPermision(this.post.userId, this.$store.state.auth.user.id);
                     console.log(response.data);
                 })
                 .catch(e => {
@@ -119,6 +124,16 @@ export default {
                 .catch(e => {
                     console.log(e);
                 });
+        },
+        hasPermision(Id, currentUser){
+            let postUserId = Id;
+            let currentUserId = currentUser;
+            if(postUserId === currentUserId){
+                this.authorizedAccess = true;
+            }
+            else  {
+                this.authorizedAccess = false;
+            }
         }
 
             
@@ -126,6 +141,8 @@ export default {
     mounted() {
         this.hasRead(this.$route.params.id, this.$store.state.auth.user.id);
         this.retrieveSpecificPost(this.$route.params.id);
+        
+
         
     }
 }
